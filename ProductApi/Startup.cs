@@ -40,7 +40,8 @@ namespace ProductApi
 
             // Register ProductConverter for dependency injection
             services.AddSingleton<IConverter<Product, ProductDto>, ProductConverter>();
-
+           
+            services.AddSwaggerGen();
 
             services.AddControllers();
         }
@@ -67,6 +68,16 @@ namespace ProductApi
             }
 
             //app.UseHttpsRedirection();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseRouting();
 
