@@ -44,7 +44,7 @@ namespace OrderApi.Data
         public IEnumerable<Order> GetByCustomer(int customerId)
         {
             var ordersForCustomer = from o in db.Orders
-                                    where o.customerId == customerId
+                                    where o.CustomerId == customerId
                                     select o;
 
             return ordersForCustomer.ToList();

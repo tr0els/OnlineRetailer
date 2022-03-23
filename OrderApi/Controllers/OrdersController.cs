@@ -59,7 +59,7 @@ namespace OrderApi.Controllers
                     // Publish OrderStatusChangedMessage. If this operation
                     // fails, the order will not be created
                     messagePublisher.PublishOrderStatusChangedMessage(
-                        order.customerId, order.OrderLines, "completed");
+                        order.CustomerId, order.OrderLines, "completed");
 
                     // Create order.
                     order.Status = Order.OrderStatus.completed;
