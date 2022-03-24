@@ -149,9 +149,26 @@ namespace OrderApi.Controllers
         [HttpPut("{id}/cancel")]
         public IActionResult Cancel(int id)
         {
-            throw new NotImplementedException();
+            var order = repository.Get(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
 
-            // Add code to implement this method.
+            try
+            {
+                messagePublisher.PublishOrderStatusChangedMessage(
+                            order.CustomerId, order.OrderLines, "cancelled");
+
+                // Create order.
+                order.Status = Order.OrderStatus.cancelled;
+                repository.Edit(order);
+                return Ok();
+            }
+            catch
+            {
+                return StatusCode(500, "An error happened. Try again.");
+            }
         }
 
         // PUT orders/5/ship

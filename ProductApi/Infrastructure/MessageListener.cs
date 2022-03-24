@@ -29,6 +29,9 @@ namespace ProductApi.Infrastructure
                 bus.PubSub.Subscribe<OrderStatusChangedMessage>("productApiHkCompleted", 
                     HandleOrderCompleted, x => x.WithTopic("completed"));
 
+                bus.PubSub.Subscribe<OrderStatusChangedMessage>("produktApiHkCancelled",
+                    HandleOrderCancelled, x => x.WithTopic("cancelled"));
+
                 // Add code to subscribe to other OrderStatusChanged events:
                 // * cancelled
                 // * shipped
@@ -64,6 +67,26 @@ namespace ProductApi.Infrastructure
                 {
                     var product = productRepos.Get(orderLine.ProductId);
                     product.ItemsReserved += orderLine.Quantity;
+                    productRepos.Edit(product);
+                }
+            }
+        }
+
+        private void HandleOrderCancelled(OrderStatusChangedMessage message)
+        {
+            using (var scope = provider.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var productRepos = services.GetService<IRepository<Product>>();
+
+                // "Un-reserve" reserved products
+                foreach (var orderLine in message.OrderLines)
+                {
+                    var product = productRepos.Get(orderLine.ProductId);
+                    // some extra handling necessary here if for some reason too few
+                    // products are reserved...
+                    product.ItemsReserved -= product.ItemsReserved < orderLine.Quantity 
+                        ? product.ItemsReserved : orderLine.Quantity;
                     productRepos.Edit(product);
                 }
             }
