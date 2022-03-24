@@ -56,41 +56,74 @@ namespace OrderApi.Controllers
                 return BadRequest();
             }
 
-            if (!CustomerStatusGood(order))
+            try
             {
-                return StatusCode(500, "Customer not in good credit standing.");
-            }
-
-            if (ProductItemsAvailable(order))
-            {
-                try
+                if (!CustomerStatusGood(order))
                 {
-                    // Publish OrderStatusChangedMessage. If this operation
-                    // fails, the order will not be created
-                    messagePublisher.PublishOrderStatusChangedMessage(
-                        order.CustomerId, order.OrderLines, "completed");
-
-                    // Create order.
-                    order.Status = Order.OrderStatus.completed;
-                    var newOrder = repository.Add(order);
-                    return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);
-                }
-                catch
-                {
-                    return StatusCode(500, "An error happened. Try again.");
+                    return StatusCode(500, "Customer not in good credit standing.");
                 }
             }
-            else
+            catch (KeyNotFoundException e)
             {
-                // If there are not enough product items available.
-                return StatusCode(500, "Not enough items in stock.");
+                return StatusCode(404, e.Message);
             }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }            
+
+            try
+            {
+                if (ProductItemsAvailable(order))
+                {
+                    try
+                    {
+                        // Publish OrderStatusChangedMessage. If this operation
+                        // fails, the order will not be created
+                        messagePublisher.PublishOrderStatusChangedMessage(
+                            order.CustomerId, order.OrderLines, "completed");
+
+                        // Create order.
+                        order.Status = Order.OrderStatus.completed;
+                        var newOrder = repository.Add(order);
+                        return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);
+                    }
+                    catch
+                    {
+                        return StatusCode(500, "An error happened. Try again.");
+                    }
+                }
+                else
+                {
+                    // If there are not enough product items available.
+                    return StatusCode(500, "Not enough items in stock.");
+                }
+            }
+            catch (KeyNotFoundException e)
+            {
+                return StatusCode(404, e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+            
         }
 
         private bool ProductItemsAvailable(Order order)
         {
             foreach (var orderLine in order.OrderLines)
             {
+                if (orderLine.ProductId <= 0)
+                {
+                    throw new ArgumentException("Product ID must be greater than 0.");
+                }
+
+                if (orderLine.Quantity <= 0)
+                {
+                    throw new ArgumentException("Quantity ordered must be greater than 0.");
+                }
+                
                 // Call product service to get the product ordered.
                 var orderedProduct = productServiceGateway.Get(orderLine.ProductId);
                 if (orderLine.Quantity > orderedProduct.ItemsInStock - orderedProduct.ItemsReserved)
@@ -103,7 +136,11 @@ namespace OrderApi.Controllers
 
         private bool CustomerStatusGood(Order order)
         {
-            return customerServiceGateway.Get(order.CustomerId).CreditStanding.Equals(CreditStanding.Good) ? true : false;
+            if (order.CustomerId <= 0)
+            {
+                throw new ArgumentException("Customer ID must be greater than 0.");
+            }
+            return customerServiceGateway.Get(order.CustomerId).CreditStanding == CreditStanding.Good;
         }
 
         // PUT orders/5/cancel

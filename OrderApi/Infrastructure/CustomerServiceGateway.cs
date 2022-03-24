@@ -1,5 +1,6 @@
 ﻿using OrderApi.Dtos;
 using RestSharp;
+using System.Collections.Generic;
 
 namespace OrderApi.Infrastructure
 {
@@ -18,7 +19,11 @@ namespace OrderApi.Infrastructure
 
             var request = new RestRequest("status/" + id.ToString());
             var response = c.GetAsync<CustomerStatusDto>(request);
-            response.Wait();
+            var result = response.Result;
+            if (result.Id == 0)
+            {
+                throw new KeyNotFoundException($"No customer with ID: {id}");
+            }
             return response.Result;
         }
     }
