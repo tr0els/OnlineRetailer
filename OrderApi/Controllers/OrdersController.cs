@@ -104,7 +104,7 @@ namespace OrderApi.Controllers
         private bool CustomerStatusGood(Order order)
         {
             return customerServiceGateway.Get(order.CustomerId)
-                .CreditStanding == CreditStanding.Good ? true : false;
+                .CreditStanding == CreditStanding.Good;
         }
 
         // PUT orders/5/cancel
