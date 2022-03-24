@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Data;
+using ProductApi.Dtos;
 using ProductApi.Models;
-using SharedModels;
 
 namespace ProductApi.Controllers
 {

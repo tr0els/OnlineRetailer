@@ -1,4 +1,4 @@
-﻿namespace SharedModels
+﻿namespace ProductApi.Dtos
 {
     public class ProductDto
     {

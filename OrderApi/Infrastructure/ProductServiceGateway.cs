@@ -1,6 +1,6 @@
 ﻿using System;
+using OrderApi.Dtos;
 using RestSharp;
-using SharedModels;
 
 namespace OrderApi.Infrastructure
 {
