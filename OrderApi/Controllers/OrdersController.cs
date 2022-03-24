@@ -103,8 +103,7 @@ namespace OrderApi.Controllers
 
         private bool CustomerStatusGood(Order order)
         {
-            return customerServiceGateway.Get(order.CustomerId)
-                .CreditStanding == CreditStanding.Good ? true : false;
+            return customerServiceGateway.Get(order.CustomerId).CreditStanding.Equals(CreditStanding.Good) ? true : false;
         }
 
         // PUT orders/5/cancel
@@ -124,9 +123,24 @@ namespace OrderApi.Controllers
         [HttpPut("{id}/ship")]
         public IActionResult Ship(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var order = repository.Get(id);
 
-            // Add code to implement this method.
+
+                // Publish OrderStatusChangedMessage. If this operation
+                // fails, the order will not be created
+                messagePublisher.PublishOrderStatusChangedMessage(order.CustomerId, order.OrderLines, "shipped");
+
+                // Update order status to shipped.
+                order.Status = Order.OrderStatus.shipped;
+                repository.Edit(order);
+                return Ok();
+            }
+            catch
+            {
+                return StatusCode(500, "An error happened. Try again.");
+            }
         }
 
         // PUT orders/5/pay
