@@ -130,6 +130,7 @@ namespace OrderApi.Controllers
                 {
                     return false;
                 }
+                orderLine.Price = orderedProduct.Price;
             }
             return true;
         }
@@ -140,7 +141,7 @@ namespace OrderApi.Controllers
             {
                 throw new ArgumentException("Customer ID must be greater than 0.");
             }
-            return customerServiceGateway.Get(order.CustomerId).CreditStanding == CreditStanding.Good;
+            return customerServiceGateway.Get(order.CustomerId).CreditStanding >= 0;
         }
 
         // PUT orders/5/cancel
@@ -160,7 +161,7 @@ namespace OrderApi.Controllers
                 messagePublisher.PublishOrderStatusChangedMessage(
                             order.CustomerId, order.OrderLines, "cancelled");
 
-                // Create order.
+                // Update order status to cancelled
                 order.Status = Order.OrderStatus.cancelled;
                 repository.Edit(order);
                 return Ok();
@@ -203,10 +204,34 @@ namespace OrderApi.Controllers
         [HttpPut("{id}/pay")]
         public IActionResult Pay(int id)
         {
-            throw new NotImplementedException();
+            var order = repository.Get(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
 
-            // Add code to implement this method.
+            try
+            {
+                decimal totalPayment = 0;
+                foreach (var line in order.OrderLines)
+                {
+                    totalPayment += line.Quantity * line.Price;
+                }
+
+                messagePublisher.PublishCreditStandingChangedMessage(
+                            order.CustomerId, totalPayment, "paid");
+
+                // Update order status to paid
+                order.Status = Order.OrderStatus.paid;
+                repository.Edit(order);
+                return Ok();
+            }
+            catch
+            {
+                return StatusCode(500, "An error happened. Try again.");
+            }
         }
-
     }
+
 }
+

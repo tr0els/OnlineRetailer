@@ -19,6 +19,17 @@ namespace OrderApi.Infrastructure
             bus.Dispose();
         }
 
+        public void PublishCreditStandingChangedMessage(int customerId, decimal payment, string topic)
+        {
+            var message = new CreditStandingChangedMessage
+            {
+                CustomerId = customerId,
+                Payment = payment
+            };
+
+            bus.PubSub.Publish(message, topic);
+        }
+
         public void PublishOrderStatusChangedMessage(int? customerId, IList<OrderLine> orderLines, string topic)
         {
             var message = new OrderStatusChangedMessage

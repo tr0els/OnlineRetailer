@@ -1,4 +1,5 @@
 using CustomerApi.Data;
+using CustomerApi.Infrastructure;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +19,11 @@ namespace CustomerApi
 {
     public class Startup
     {
+        // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
+        // Remember to replace this connectionstring with your own.
+        string cloudAMQPConnectionString =
+            "host=rattlesnake.rmq.cloudamqp.com;virtualHost=pfyoxdnf;username=pfyoxdnf;password=Sh-G_0bSs87gBcJ54vJMva1IWeWdQ6pQ";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -53,6 +59,10 @@ namespace CustomerApi
                 var dbInitializer = services.GetService<IDbInitializer>();
                 dbInitializer.Initialize(dbContext);
             }
+
+            // Create a message listener in a separate thread.
+            Task.Factory.StartNew(() =>
+                new MessageListener(app.ApplicationServices, cloudAMQPConnectionString).Start());
 
             if (env.IsDevelopment())
             {
