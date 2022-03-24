@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
+using OrderApi.Dtos;
 using OrderApi.Infrastructure;
 using SharedModels;
 
@@ -13,14 +14,17 @@ namespace OrderApi.Controllers
     {
         IOrderRepository repository;
         IServiceGateway<ProductDto> productServiceGateway;
+        IServiceGateway<CustomerStatusDto> customerServiceGateway;
         IMessagePublisher messagePublisher;
 
         public OrdersController(IRepository<Order> repos,
-            IServiceGateway<ProductDto> gateway,
+            IServiceGateway<ProductDto> productGateway,
+            IServiceGateway<CustomerStatusDto> customerGateway,
             IMessagePublisher publisher)
         {
             repository = repos as IOrderRepository;
-            productServiceGateway = gateway;
+            productServiceGateway = productGateway;
+            customerServiceGateway = customerGateway;
             messagePublisher = publisher;
         }
 
@@ -50,6 +54,11 @@ namespace OrderApi.Controllers
             if (order == null)
             {
                 return BadRequest();
+            }
+
+            if (!CustomerStatusGood(order))
+            {
+                return StatusCode(500, "Customer not in good credit standing.");
             }
 
             if (ProductItemsAvailable(order))
@@ -90,6 +99,12 @@ namespace OrderApi.Controllers
                 }
             }
             return true;
+        }
+
+        private bool CustomerStatusGood(Order order)
+        {
+            return customerServiceGateway.Get(order.CustomerId)
+                .CreditStanding == CreditStanding.Good ? true : false;
         }
 
         // PUT orders/5/cancel

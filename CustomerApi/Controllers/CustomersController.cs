@@ -1,4 +1,5 @@
 ﻿using CustomerApi.Data;
+using CustomerApi.Dtos;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -83,6 +84,24 @@ namespace CustomerApi.Controllers
 
             repository.Remove(id);
             return new NoContentResult();
+        }
+
+        [HttpGet("status/{id}", Name = "GetCustomerStatus")]
+        public IActionResult GetCustomerStatus(int id)
+        {
+            var item = repository.Get(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var dto = new CustomerStatusDto
+            {
+                Id = item.Id,
+                CreditStanding = item.CreditStanding,
+            };
+
+            return new ObjectResult(dto);
         }
     }
 }

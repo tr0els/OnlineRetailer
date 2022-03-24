@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderApi.Data;
+using OrderApi.Dtos;
 using OrderApi.Infrastructure;
 using SharedModels;
 
@@ -19,7 +20,7 @@ namespace OrderApi
         // the order service).
         string productServiceBaseUrl = "http://productapi/products/";
 
-        string customerServiceBaseUrl = "http://customerapi/customers"; // remember to make gateway
+        string customerServiceBaseUrl = "http://customerapi/customers/";
 
         // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
         // Remember to replace this connectionstring with your own.
@@ -48,6 +49,9 @@ namespace OrderApi
             // Register product service gateway for dependency injection
             services.AddSingleton<IServiceGateway<ProductDto>>(new
                 ProductServiceGateway(productServiceBaseUrl));
+
+            services.AddSingleton<IServiceGateway<CustomerStatusDto>>(new
+                CustomerServiceGateway(customerServiceBaseUrl));
 
             // Register MessagePublisher (a messaging gateway) for dependency injection
             services.AddSingleton<IMessagePublisher>(new
