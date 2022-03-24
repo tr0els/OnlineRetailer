@@ -32,6 +32,9 @@ namespace ProductApi.Infrastructure
                 bus.PubSub.Subscribe<OrderStatusChangedMessage>("produktApiHkCancelled",
                     HandleOrderCancelled, x => x.WithTopic("cancelled"));
 
+                bus.PubSub.Subscribe<OrderStatusChangedMessage>("productApiHkShipped",
+                    HandleOrderShipped, x => x.WithTopic("shipped"));
+
                 // Add code to subscribe to other OrderStatusChanged events:
                 // * cancelled
                 // * shipped
@@ -87,6 +90,28 @@ namespace ProductApi.Infrastructure
                     // products are reserved...
                     product.ItemsReserved -= product.ItemsReserved < orderLine.Quantity 
                         ? product.ItemsReserved : orderLine.Quantity;
+                    productRepos.Edit(product);
+                }
+            }
+        }
+
+        private void HandleOrderShipped(OrderStatusChangedMessage message)
+        {
+            // A service scope is created to get an instance of the product repository.
+            // When the service scope is disposed, the product repository instance will
+            // also be disposed.
+            using (var scope = provider.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var productRepos = services.GetService<IRepository<Product>>();
+
+                // Rremove reservations of ordered products.
+                // Beware that this operation is not idempotent.
+                foreach (var orderLine in message.OrderLines)
+                {
+                    var product = productRepos.Get(orderLine.ProductId);
+                    product.ItemsInStock -= orderLine.Quantity;
+                    product.ItemsReserved -= orderLine.Quantity;
                     productRepos.Edit(product);
                 }
             }
