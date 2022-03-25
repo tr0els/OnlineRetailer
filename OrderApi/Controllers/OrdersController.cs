@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
 using OrderApi.Dtos;
 using OrderApi.Infrastructure;
+using OrderApi.Models;
 using SharedModels;
 
 namespace OrderApi.Controllers
@@ -75,23 +76,16 @@ namespace OrderApi.Controllers
             try
             {
                 if (ProductItemsAvailable(order))
-                {
-                    try
-                    {
-                        // Publish OrderStatusChangedMessage. If this operation
-                        // fails, the order will not be created
-                        messagePublisher.PublishOrderStatusChangedMessage(
-                            order.CustomerId, order.OrderLines, "completed");
+                {                    
+                    // Publish OrderStatusChangedMessage. If this operation
+                    // fails, the order will not be created
+                    messagePublisher.PublishOrderStatusChangedMessage(
+                        order.CustomerId, order.OrderLines, "completed");
 
-                        // Create order.
-                        order.Status = Order.OrderStatus.completed;
-                        var newOrder = repository.Add(order);
-                        return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);
-                    }
-                    catch
-                    {
-                        return StatusCode(500, "An error happened. Try again.");
-                    }
+                    // Create order.
+                    order.Status = Order.OrderStatus.completed;
+                    var newOrder = repository.Add(order);
+                    return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);                   
                 }
                 else
                 {
@@ -107,7 +101,11 @@ namespace OrderApi.Controllers
             {
                 return BadRequest(e.Message);
             }
-            
+            catch (Exception)
+            {
+                return StatusCode(500, "An error happened. Try again.");
+            }
+
         }
 
         private bool ProductItemsAvailable(Order order)

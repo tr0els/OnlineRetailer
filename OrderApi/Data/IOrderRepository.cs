@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using OrderApi.Models;
 using SharedModels;
 
 namespace OrderApi.Data

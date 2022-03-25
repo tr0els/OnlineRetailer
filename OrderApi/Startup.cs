@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using OrderApi.Data;
 using OrderApi.Dtos;
 using OrderApi.Infrastructure;
+using OrderApi.Models;
 using SharedModels;
 
 namespace OrderApi

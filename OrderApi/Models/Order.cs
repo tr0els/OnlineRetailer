@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SharedModels;
+using System;
 using System.Collections.Generic;
 
-namespace SharedModels
+namespace OrderApi.Models
 {
     public class Order
     {
@@ -18,14 +19,5 @@ namespace SharedModels
             shipped,
             paid
         }
-    }
-
-    public class OrderLine
-    {
-        public int Id { get; set; }
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
     }
 }
