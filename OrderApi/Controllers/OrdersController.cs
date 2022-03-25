@@ -49,7 +49,7 @@ namespace OrderApi.Controllers
         }
 
         // GET orders by customer
-        [HttpGet("bycustomer/{id}", Name = "GetByCustomer")]
+        [HttpGet("bycustomer/{customerId}", Name = "GetByCustomer")]
         public IActionResult GetByCustomer(int customerId)
         {
             if (customerId <= 0)
