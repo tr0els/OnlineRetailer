@@ -52,6 +52,11 @@ namespace OrderApi.Controllers
         [HttpGet("bycustomer/{id}", Name = "GetByCustomer")]
         public IActionResult GetByCustomer(int customerId)
         {
+            if (customerId <= 0)
+            {
+                return BadRequest("Customer ID must be greater than 0.");
+            }
+
             try
             {
                 // will throw exception if customer does not exist
