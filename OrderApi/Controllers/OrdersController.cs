@@ -48,6 +48,23 @@ namespace OrderApi.Controllers
             return new ObjectResult(item);
         }
 
+        // GET orders by customer
+        [HttpGet("bycustomer/{id}", Name = "GetByCustomer")]
+        public IActionResult GetByCustomer(int customerId)
+        {
+            try
+            {
+                // will throw exception if customer does not exist
+                customerServiceGateway.Get(customerId);
+                return new ObjectResult(repository.GetByCustomer(customerId));
+            }
+            catch (KeyNotFoundException e)
+            {
+                return BadRequest(e.Message);
+            }          
+            
+        }
+
         // POST orders
         [HttpPost]
         public IActionResult Post([FromBody]Order order)
