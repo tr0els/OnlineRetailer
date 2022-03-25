@@ -27,7 +27,7 @@ namespace CustomerApi.Infrastructure
             using (var bus = RabbitHutch.CreateBus(connectionString))
             {
                 bus.PubSub.Subscribe<CreditStandingChangedMessage>("customerApiHkCompleted", 
-                    HandleOrderPaid, x => x.WithTopic("paid"));
+                    HandleOrderPaid, x => x.WithTopic("creditchanged"));
 
                 // Block the thread so that it will not exit and stop subscribing.
                 lock (this)
@@ -49,7 +49,7 @@ namespace CustomerApi.Infrastructure
                 var repository = services.GetService<IRepository<Customer>>();
 
                 var customer = repository.Get(message.CustomerId);
-                customer.CreditStanding -= message.Payment;
+                customer.CreditStanding += message.Payment;
                 repository.Edit(customer);
             }
         }

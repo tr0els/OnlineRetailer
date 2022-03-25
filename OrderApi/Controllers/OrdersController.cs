@@ -83,7 +83,7 @@ namespace OrderApi.Controllers
                         order.CustomerId, order.OrderLines, "completed");
 
                     // Create order.
-                    order.Status = Order.OrderStatus.completed;
+                    order.Status = Order.OrderStatus.Completed;
                     var newOrder = repository.Add(order);
                     return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);                   
                 }
@@ -153,6 +153,10 @@ namespace OrderApi.Controllers
             {
                 return NotFound();
             }
+            if (order.Status != Order.OrderStatus.Completed)
+            {
+                return BadRequest("Can only cancel completed orders");
+            }
 
             try
             {
@@ -160,7 +164,7 @@ namespace OrderApi.Controllers
                             order.CustomerId, order.OrderLines, "cancelled");
 
                 // Update order status to cancelled
-                order.Status = Order.OrderStatus.cancelled;
+                order.Status = Order.OrderStatus.Cancelled;
                 repository.Edit(order);
                 return Ok();
             }
@@ -176,17 +180,27 @@ namespace OrderApi.Controllers
         [HttpPut("{id}/ship")]
         public IActionResult Ship(int id)
         {
-            try
+            var order = repository.Get(id);
+            if (order == null)
             {
-                var order = repository.Get(id);
+                return NotFound();
+            }
+            if (order.Status != Order.OrderStatus.Completed)
+            {
+                return BadRequest("Can only ship completed orders");
+            }
 
-
+            try
+            {              
                 // Publish OrderStatusChangedMessage. If this operation
                 // fails, the order will not be created
                 messagePublisher.PublishOrderStatusChangedMessage(order.CustomerId, order.OrderLines, "shipped");
 
+                messagePublisher.PublishCreditStandingChangedMessage(
+                            order.CustomerId, -CalculatePayment(order), "creditchanged");
+
                 // Update order status to shipped.
-                order.Status = Order.OrderStatus.shipped;
+                order.Status = Order.OrderStatus.Shipped;
                 repository.Edit(order);
                 return Ok();
             }
@@ -207,20 +221,18 @@ namespace OrderApi.Controllers
             {
                 return NotFound();
             }
+            if (order.Status != Order.OrderStatus.Shipped)
+            {
+                return BadRequest("Can only pay for shipped orders");
+            }
 
             try
             {
-                decimal totalPayment = 0;
-                foreach (var line in order.OrderLines)
-                {
-                    totalPayment += line.Quantity * line.Price;
-                }
-
                 messagePublisher.PublishCreditStandingChangedMessage(
-                            order.CustomerId, totalPayment, "paid");
+                            order.CustomerId, CalculatePayment(order), "creditchanged");
 
                 // Update order status to paid
-                order.Status = Order.OrderStatus.paid;
+                order.Status = Order.OrderStatus.Paid;
                 repository.Edit(order);
                 return Ok();
             }
@@ -228,6 +240,16 @@ namespace OrderApi.Controllers
             {
                 return StatusCode(500, "An error happened. Try again.");
             }
+        }
+
+        private decimal CalculatePayment(Order order)
+        {
+            decimal totalPayment = 0;
+            foreach (var line in order.OrderLines)
+            {
+                totalPayment += line.Quantity * line.Price;
+            }
+            return totalPayment;
         }
     }
 

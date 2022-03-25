@@ -14,10 +14,10 @@ namespace OrderApi.Models
 
         public enum OrderStatus
         {
-            cancelled,
-            completed,
-            shipped,
-            paid
+            Cancelled,
+            Completed,
+            Shipped,
+            Paid
         }
     }
 }
