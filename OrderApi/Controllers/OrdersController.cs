@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderApi.Data;
-using OrderApi.Dtos;
 using OrderApi.Infrastructure;
 using OrderApi.Models;
 using SharedModels;
@@ -13,20 +12,23 @@ namespace OrderApi.Controllers
     [Route("[controller]")]
     public class OrdersController : ControllerBase
     {
-        IOrderRepository repository;
-        IServiceGateway<ProductDto> productServiceGateway;
-        IServiceGateway<CustomerStatusDto> customerServiceGateway;
-        IMessagePublisher messagePublisher;
+        private readonly IOrderRepository repository;
+        private readonly IServiceGateway<ProductDto> productServiceGateway;
+        private readonly IServiceGateway<CustomerStatusDto> customerServiceGateway;
+        private readonly IMessagePublisher messagePublisher;
+        private readonly IConverter<OrderLine, OrderLineDto> orderLineConverter;
 
         public OrdersController(IRepository<Order> repos,
             IServiceGateway<ProductDto> productGateway,
             IServiceGateway<CustomerStatusDto> customerGateway,
-            IMessagePublisher publisher)
+            IMessagePublisher publisher,
+            IConverter<OrderLine, OrderLineDto> converter)
         {
             repository = repos as IOrderRepository;
             productServiceGateway = productGateway;
             customerServiceGateway = customerGateway;
             messagePublisher = publisher;
+            orderLineConverter = converter;
         }
 
         // GET orders
@@ -98,11 +100,11 @@ namespace OrderApi.Controllers
             try
             {
                 if (ProductItemsAvailable(order))
-                {                    
+                {
                     // Publish OrderStatusChangedMessage. If this operation
                     // fails, the order will not be created
                     messagePublisher.PublishOrderStatusChangedMessage(
-                        order.CustomerId, order.OrderLines, "completed");
+                        order.CustomerId, orderLineConverter.ConvertMany(order.OrderLines), "completed");
 
                     // Create order.
                     order.Status = Order.OrderStatus.Completed;
@@ -161,7 +163,7 @@ namespace OrderApi.Controllers
             {
                 throw new ArgumentException("Customer ID must be greater than 0.");
             }
-            return customerServiceGateway.Get(order.CustomerId).CreditStanding >= 0;
+            return customerServiceGateway.Get(order.CustomerId).GoodCreditStanding;
         }
 
         // PUT orders/5/cancel
@@ -183,7 +185,7 @@ namespace OrderApi.Controllers
             try
             {
                 messagePublisher.PublishOrderStatusChangedMessage(
-                            order.CustomerId, order.OrderLines, "cancelled");
+                            order.CustomerId, orderLineConverter.ConvertMany(order.OrderLines), "cancelled");
 
                 // Update order status to cancelled
                 order.Status = Order.OrderStatus.Cancelled;
@@ -216,17 +218,31 @@ namespace OrderApi.Controllers
             {              
                 // Publish OrderStatusChangedMessage. If this operation
                 // fails, the order will not be created
-                messagePublisher.PublishOrderStatusChangedMessage(order.CustomerId, order.OrderLines, "shipped");
-
-                messagePublisher.PublishCreditStandingChangedMessage(
-                            order.CustomerId, -CalculatePayment(order), "creditchanged");
+                messagePublisher.PublishOrderStatusChangedMessage(
+                    order.CustomerId, orderLineConverter.ConvertMany(order.OrderLines), "shipped");                      
 
                 // Update order status to shipped.
                 order.Status = Order.OrderStatus.Shipped;
                 repository.Edit(order);
+
+                // If customer credit standing is good, change it to bad
+                if (CustomerStatusGood(order))
+                {
+                    messagePublisher.PublishCreditStandingChangedMessage(
+                            order.CustomerId, "creditchanged");
+                }
+
                 return Ok();
             }
-            catch
+            catch (KeyNotFoundException e)
+            {
+                return StatusCode(404, e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception)
             {
                 return StatusCode(500, "An error happened. Try again.");
             }
@@ -250,28 +266,47 @@ namespace OrderApi.Controllers
 
             try
             {
-                messagePublisher.PublishCreditStandingChangedMessage(
-                            order.CustomerId, CalculatePayment(order), "creditchanged");
-
                 // Update order status to paid
                 order.Status = Order.OrderStatus.Paid;
                 repository.Edit(order);
+                
+                // If this payment means customer no longer has unpaid shipped orders,
+                // change their credit standing
+                if (!CustomerStatusGood(order) && CustomerHasNoUnpaidShippedOrders(order.CustomerId))
+                {
+                    messagePublisher.PublishCreditStandingChangedMessage(
+                            order.CustomerId, "creditchanged");
+                }
+
                 return Ok();
             }
-            catch
+            catch (KeyNotFoundException e)
+            {
+                return StatusCode(404, e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception)
             {
                 return StatusCode(500, "An error happened. Try again.");
             }
         }
 
-        private decimal CalculatePayment(Order order)
+        private bool CustomerHasNoUnpaidShippedOrders(int customerId)
         {
-            decimal totalPayment = 0;
-            foreach (var line in order.OrderLines)
+            List<Order> customerOrders = repository.GetByCustomer(customerId) as List<Order>;
+
+            foreach (var order in customerOrders)
             {
-                totalPayment += line.Quantity * line.Price;
+                if (order.Status == Order.OrderStatus.Shipped)
+                {
+                    return false;
+                }
             }
-            return totalPayment;
+
+            return true;
         }
     }
 

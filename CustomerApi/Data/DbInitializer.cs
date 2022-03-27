@@ -28,7 +28,7 @@ namespace CustomerApi.Data
                     Phone = "12345678",
                     BillingAddress = "Nyvej 1",
                     ShippingAddress = "Gammelvej 1",
-                    CreditStanding = 0
+                    CreditStanding = CreditStanding.Good
                 },
                 new Customer
                 {
@@ -37,7 +37,7 @@ namespace CustomerApi.Data
                     Phone = "87654321",
                     BillingAddress = "Østervænget 1",
                     ShippingAddress = "Vestervænget 1",
-                    CreditStanding = -10000
+                    CreditStanding = CreditStanding.Bad
                 }
             };
 

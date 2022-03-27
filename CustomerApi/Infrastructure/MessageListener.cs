@@ -49,7 +49,8 @@ namespace CustomerApi.Infrastructure
                 var repository = services.GetService<IRepository<Customer>>();
 
                 var customer = repository.Get(message.CustomerId);
-                customer.CreditStanding += message.Payment;
+                customer.CreditStanding = customer.CreditStanding == CreditStanding.Good 
+                    ? CreditStanding.Bad : CreditStanding.Good;
                 repository.Edit(customer);
             }
         }

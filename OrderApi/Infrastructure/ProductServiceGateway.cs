@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using OrderApi.Dtos;
 using RestSharp;
+using SharedModels;
 
 namespace OrderApi.Infrastructure
 {
@@ -21,12 +21,11 @@ namespace OrderApi.Infrastructure
             var request = new RestRequest(id.ToString());
             var response = c.GetAsync<ProductDto>(request);
             response.Wait();
-            var result = response.Result;
-            if (result.Id == 0)
+            if (response.IsCompletedSuccessfully)
             {
-                throw new KeyNotFoundException($"No product with ID: {id}");
+                return response.Result;
             }
-            return result;
+            throw new KeyNotFoundException($"No product with ID: {id}");
         }
     }
 }

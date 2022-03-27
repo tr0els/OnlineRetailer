@@ -8,6 +8,12 @@
         public string Phone { get; set; }
         public string BillingAddress { get; set; }
         public string ShippingAddress { get; set; }
-        public decimal CreditStanding { get; set; }
+        public CreditStanding CreditStanding { get; set; }
+    }
+
+    public enum CreditStanding
+    {
+        Good,
+        Bad
     }
 }

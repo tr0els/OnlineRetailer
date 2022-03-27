@@ -1,8 +1,8 @@
 ﻿using CustomerApi.Data;
-using CustomerApi.Dtos;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedModels;
 using System.Collections.Generic;
 
 namespace CustomerApi.Controllers
@@ -98,7 +98,7 @@ namespace CustomerApi.Controllers
             var dto = new CustomerStatusDto
             {
                 Id = item.Id,
-                CreditStanding = item.CreditStanding,
+                GoodCreditStanding = item.CreditStanding == CreditStanding.Good
             };
 
             return new ObjectResult(dto);

@@ -1,5 +1,4 @@
-﻿using SharedModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace OrderApi.Models
@@ -18,6 +17,6 @@ namespace OrderApi.Models
             Completed,
             Shipped,
             Paid
-        }
+        }        
     }
 }

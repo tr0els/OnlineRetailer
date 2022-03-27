@@ -1,4 +1,4 @@
-﻿using ProductApi.Dtos;
+﻿using SharedModels;
 
 namespace ProductApi.Models
 {

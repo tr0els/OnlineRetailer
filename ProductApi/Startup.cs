@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProductApi.Data;
-using ProductApi.Dtos;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 using SharedModels;
