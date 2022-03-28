@@ -21,9 +21,10 @@ namespace OrderApi.Infrastructure
             var request = new RestRequest(id.ToString());
             var response = c.GetAsync<ProductDto>(request);
             response.Wait();
-            if (response.IsCompletedSuccessfully)
+            var result = response.Result;
+            if (result.Id != 0)
             {
-                return response.Result;
+                return result;
             }
             throw new KeyNotFoundException($"No product with ID: {id}");
         }

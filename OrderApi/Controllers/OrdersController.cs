@@ -225,22 +225,11 @@ namespace OrderApi.Controllers
                 order.Status = Order.OrderStatus.Shipped;
                 repository.Edit(order);
 
-                // If customer credit standing is good, change it to bad
-                if (CustomerStatusGood(order))
-                {
-                    messagePublisher.PublishCreditStandingChangedMessage(
-                            order.CustomerId, "creditchanged");
-                }
+                // Change customer credit standing to bad
+                messagePublisher.PublishCreditStandingChangedMessage(
+                        order.CustomerId, "creditstandingworsened");
 
                 return Ok();
-            }
-            catch (KeyNotFoundException e)
-            {
-                return StatusCode(404, e.Message);
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
             }
             catch (Exception)
             {
@@ -272,21 +261,13 @@ namespace OrderApi.Controllers
                 
                 // If this payment means customer no longer has unpaid shipped orders,
                 // change their credit standing
-                if (!CustomerStatusGood(order) && CustomerHasNoUnpaidShippedOrders(order.CustomerId))
+                if (CustomerHasNoUnpaidShippedOrders(order.CustomerId))
                 {
                     messagePublisher.PublishCreditStandingChangedMessage(
-                            order.CustomerId, "creditchanged");
+                            order.CustomerId, "creditstandingimproved");
                 }
 
                 return Ok();
-            }
-            catch (KeyNotFoundException e)
-            {
-                return StatusCode(404, e.Message);
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
             }
             catch (Exception)
             {
