@@ -51,7 +51,7 @@ namespace OrderApi.Controllers
         }
 
         // GET orders by customer
-        [HttpGet("bycustomer/{customerId}", Name = "GetByCustomer")]
+        [HttpGet("customer/{customerId}", Name = "GetByCustomer")]
         public IActionResult GetByCustomer(int customerId)
         {
             if (customerId <= 0)
@@ -68,8 +68,28 @@ namespace OrderApi.Controllers
             catch (KeyNotFoundException e)
             {
                 return BadRequest(e.Message);
-            }          
-            
+            }        
+        }
+
+        // GET orders by product (orders with any orderlines with this product)
+        [HttpGet("product/{productId}", Name = "GetByProduct")]
+        public IActionResult GetByProduct(int productId)
+        {
+            if (productId <= 0)
+            {
+                return BadRequest("Product ID must be greater than 0.");
+            }
+
+            try
+            {
+                // will throw exception if product does not exist
+                productServiceGateway.Get(productId);
+                return new ObjectResult(repository.GetByProduct(productId));
+            }
+            catch (KeyNotFoundException e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // POST orders

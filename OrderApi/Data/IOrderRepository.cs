@@ -7,5 +7,7 @@ namespace OrderApi.Data
     public interface IOrderRepository : IRepository<Order>
     {
         IEnumerable<Order> GetByCustomer(int customerId);
+
+        IEnumerable<Order> GetByProduct(int productId);
     }
 }

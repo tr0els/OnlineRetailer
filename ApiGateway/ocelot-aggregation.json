@@ -1,0 +1,158 @@
+{
+  "Routes": [
+    {
+      // ProductApi routes for aggregate: Orders and products
+      "DownstreamPathTemplate": "/products",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/productapi/products",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "allproducts"
+    },
+    {
+      // OrderApi routes for aggregate: Orders and products
+      "DownstreamPathTemplate": "/orders",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/orderapi/orders",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "allorders"
+    },
+    {
+      // ProductApi routes for aggregate: Orders by product
+      "DownstreamPathTemplate": "/products/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/productapi/products/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "product"
+    },
+    {
+      // OrderApi routes for aggregate: Orders by product
+      "DownstreamPathTemplate": "/orders/product/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/orderapi/orders/product/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "ordersbyproduct"
+    },
+    {
+      // CustomerApi routes for aggregate: Orders by customer
+      "DownstreamPathTemplate": "/customers/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "customerapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/customerapi/customers/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "customer"
+    },
+    {
+      // OrderApi routes for aggregate: Orders by customer
+      "DownstreamPathTemplate": "/orders/customer/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/orderapi/orders/customer/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Key": "ordersbycustomer"
+    },
+    {
+      // Other ProductApi routes
+      "DownstreamPathTemplate": "/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/productapi/{catchAll}",
+      "UpstreamHttpMethod": [ "Get" ]
+    },
+    {
+      // Other OrderApi routes
+      "DownstreamPathTemplate": "/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "orderapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/orderapi/{catchAll}",
+      "UpstreamHttpMethod": [ "Get", "Post" ]
+    },
+    {
+      // Other CustomerApi routes
+      "DownstreamPathTemplate": "/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "customerapi",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/customer/{catchAll}",
+      "UpstreamHttpMethod": [ "Get" ]
+    }
+  ],
+  // Aggregates:
+  "Aggregates": [
+    // Orders by product
+    {
+      "RouteKeys": [
+        "ordersbyproduct",
+        "product"
+      ],
+      "UpstreamPathTemplate": "/aggregates/ordersbyproduct/{id}"
+    },
+    // Orders by customer
+    {
+      "RouteKeys": [
+        "ordersbycustomer",
+        "customer"
+      ],
+      "UpstreamPathTemplate":  "/aggregates/ordersbycustomer/{id}"
+    },
+    // Orders and products
+    {
+      "RouteKeys": [
+        "allorders",
+        "allproducts"
+      ],
+      "UpstreamPathTemplate": "/aggregates/ordersandproducts"
+    }
+  ],
+  // Global configuration
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7443"
+  }
+}

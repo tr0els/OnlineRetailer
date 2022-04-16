@@ -51,6 +51,13 @@ namespace OrderApi.Data
             return ordersForCustomer.ToList();
         }
 
+        public IEnumerable<Order> GetByProduct(int productId)
+        {
+            return db.Orders.Include(o => o.OrderLines)
+                .Where(o => o.OrderLines.Any(ol => ol.ProductId == productId))
+                .ToList();
+        }
+
         public void Remove(int id)
         {
             var order = db.Orders.FirstOrDefault(p => p.Id == id);
