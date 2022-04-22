@@ -120,7 +120,7 @@
           "Port": 80
         }
       ],
-      "UpstreamPathTemplate": "/customer/{catchAll}",
+      "UpstreamPathTemplate": "/customerapi/{catchAll}",
       "UpstreamHttpMethod": [ "Get" ]
     }
   ],
