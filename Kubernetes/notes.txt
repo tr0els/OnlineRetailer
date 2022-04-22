@@ -1,0 +1,17 @@
+// To build all 3 apis at the same time using the docker-compose.yml (and override file with certificate?)
+docker build						# in root folder with docker-compose.yml file
+
+// add local image to docker-hub
+docker tag orderapi tr0els/online-retailer.orderapi
+docker push tr0els/online-retailer.orderapi
+
+// kubernetes
+kubectl apply -f .
+kubectl get services 					# list online services
+kubectl get rs 						# get replica sets
+kubectl delete -f .
+
+// k8s multiple files alternatives
+kubectl apply -f ./my-manifest.yaml			# create resource(s)
+kubectl apply -f ./my1.yaml -f ./my2.yaml		# create from multiple files
+kubectl apply -f ./dir					# create resource(s) in all manifest files in dir

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: customerapi
-        image: fauxtistic/customerapi:ver2
+        image: tr0els/online-retailer.customerapi:latest
 ---
 apiVersion: v1
 kind: Service
@@ -23,7 +23,7 @@ metadata:
   name: customerapi
   namespace: default
 spec:
-  type: NodePort
+  type: NodePort # NodePort = development, LoadBalancer for Real deployed app
   selector:
     app: customerapi
   ports:

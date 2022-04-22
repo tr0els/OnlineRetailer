@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: productapi
-        image: fauxtistic/productapi:ver2
+        image: tr0els/online-retailer.productapi:latest
 ---
 apiVersion: v1
 kind: Service

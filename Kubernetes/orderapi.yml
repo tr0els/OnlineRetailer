@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: orderapi
-        image: fauxtistic/orderapi:ver2
+        image: tr0els/online-retailer.orderapi:latest
 ---
 apiVersion: v1
 kind: Service
