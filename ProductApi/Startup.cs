@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProductApi.Data;
+using ProductApi.GraphQL;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 using Prometheus;
@@ -45,6 +46,12 @@ namespace ProductApi
             services.AddSwaggerGen();
 
             services.AddControllers();
+
+            services
+                .AddGraphQLServer()
+                .AddQueryType<Query>()
+                .AddFiltering()
+                .AddSorting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,6 +97,7 @@ namespace ProductApi
             {
                 endpoints.MapControllers();
                 endpoints.MapMetrics();
+                endpoints.MapGraphQL();
             });
         }
     }

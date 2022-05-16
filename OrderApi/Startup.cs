@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OrderApi.Data;
+using OrderApi.GraphQL;
 using OrderApi.Infrastructure;
 using OrderApi.Models;
 using Prometheus;
@@ -63,6 +64,13 @@ namespace OrderApi
             services.AddSwaggerGen();
 
             services.AddControllers();
+
+            services
+                .AddGraphQLServer()
+                .AddQueryType<Query>()
+                .AddProjections()
+                .AddFiltering()
+                .AddSorting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -104,6 +112,7 @@ namespace OrderApi
             {
                 endpoints.MapControllers();
                 endpoints.MapMetrics();
+                endpoints.MapGraphQL();
             });
         }
     }

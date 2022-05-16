@@ -1,4 +1,5 @@
 using CustomerApi.Data;
+using CustomerApi.GraphQL;
 using CustomerApi.Infrastructure;
 using CustomerApi.Models;
 using Microsoft.AspNetCore.Builder;
@@ -47,6 +48,12 @@ namespace CustomerApi
             services.AddSwaggerGen();
 
             services.AddControllers();
+
+            services
+                .AddGraphQLServer()
+                .AddQueryType<Query>()
+                .AddFiltering()
+                .AddSorting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +99,7 @@ namespace CustomerApi
             {
                 endpoints.MapControllers();
                 endpoints.MapMetrics();
+                endpoints.MapGraphQL();
             });
         }
     }

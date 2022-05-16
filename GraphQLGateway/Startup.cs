@@ -15,6 +15,10 @@ namespace GraphQLGateway
 {
     public class Startup
     {
+        public const string Customers = "customers";
+        public const string Orders = "orders";
+        public const string Products = "products";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -25,6 +29,18 @@ namespace GraphQLGateway
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            /*services.AddHttpClient(Customers, c => c.BaseAddress = new Uri("http://customerapi/graphql/"));
+            services.AddHttpClient(Orders, c => c.BaseAddress = new Uri("http://orderapi/graphql/"));
+            services.AddHttpClient(Products, c => c.BaseAddress = new Uri("http://productapi/graphql/"));*/
+
+            services.AddHttpClient(Customers, c => c.BaseAddress = new Uri("https://localhost:44304/graphql/"));
+            services.AddHttpClient(Orders, c => c.BaseAddress = new Uri("https://localhost:44309/graphql/"));
+            services.AddHttpClient(Products, c => c.BaseAddress = new Uri("https://localhost:44398/graphql/"));
+
+            services.AddGraphQLServer()
+                .AddRemoteSchema(Customers)
+                .AddRemoteSchema(Orders)
+                .AddRemoteSchema(Products);
 
             services.AddControllers();
         }
@@ -46,6 +62,7 @@ namespace GraphQLGateway
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGraphQL();
             });
         }
     }
