@@ -39,3 +39,10 @@ services:
     ports:
       - "3000:3000" 
 
+
+  graphqlgateway:
+    image: ${DOCKER_REGISTRY-}graphqlgateway
+    build:
+      context: .
+      dockerfile: GraphQLGateway/Dockerfile
+
