@@ -10,9 +10,14 @@ namespace CustomerApi.GraphQL
     {
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Customer> GetCustomer([Service] CustomerApiContext context)
+        public IQueryable<Customer> GetCustomers([Service] CustomerApiContext context)
         {
             return context.Customers;
+        }
+
+        public Customer GetCustomer(int id, [Service] CustomerApiContext context)
+        {
+            return context.Customers.FirstOrDefault(c => c.Id == id);
         }
     }
 }

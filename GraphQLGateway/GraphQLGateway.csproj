@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GraphQL.Server.Ui.Voyager" Version="6.0.0" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="12.9.0" />
     <PackageReference Include="HotChocolate.Stitching" Version="12.9.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />

@@ -15,5 +15,13 @@ namespace OrderApi.GraphQL
         {
             return context.Orders;
         }
+
+        [UseProjection]
+        [UseFiltering]
+        [UseSorting]
+        public IQueryable<Order> GetOrdersByCustomer(int customerId, [Service] OrderApiContext context)
+        {
+            return context.Orders.Where(o => o.CustomerId == customerId);
+        }
     }
 }

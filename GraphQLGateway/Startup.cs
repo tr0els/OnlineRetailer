@@ -1,3 +1,4 @@
+using GraphQL.Server.Ui.Voyager;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,10 +38,16 @@ namespace GraphQLGateway
             services.AddHttpClient(Orders, c => c.BaseAddress = new Uri("https://localhost:44309/graphql/"));
             services.AddHttpClient(Products, c => c.BaseAddress = new Uri("https://localhost:44398/graphql/"));
 
+            /*services.AddGraphQLServer()
+                .AddRemoteSchema(Customers)
+                .AddRemoteSchema(Orders)
+                .AddRemoteSchema(Products);*/
+
             services.AddGraphQLServer()
                 .AddRemoteSchema(Customers)
                 .AddRemoteSchema(Orders)
-                .AddRemoteSchema(Products);
+                .AddRemoteSchema(Products)
+                .AddTypeExtensionsFromFile("./stitching.graphql");
 
             services.AddControllers();
         }
@@ -64,6 +71,11 @@ namespace GraphQLGateway
                 endpoints.MapControllers();
                 endpoints.MapGraphQL();
             });
+
+            app.UseGraphQLVoyager(new VoyagerOptions()
+            {
+                GraphQLEndPoint = "/graphql"
+            }, "/graphql-voyager");
         }
     }
 }

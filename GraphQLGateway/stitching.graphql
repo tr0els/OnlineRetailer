@@ -1,0 +1,3 @@
+﻿extend type Customer {
+  orders: [Order] @delegate(schema: "orders" path: "ordersByCustomer(customerId: $fields:id)")
+}

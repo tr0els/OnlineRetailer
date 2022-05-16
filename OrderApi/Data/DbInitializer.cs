@@ -22,6 +22,7 @@ namespace OrderApi.Data
             List<Order> orders = new List<Order>
             {
                 new Order {
+                    CustomerId = 2,
                     Date = DateTime.Today,
                     OrderLines = new List<OrderLine>{
                         new OrderLine { ProductId = 1, Quantity = 2 } }
