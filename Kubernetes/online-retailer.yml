@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customerapi
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customerapi
+  template:
+    metadata:
+      labels:
+        app: customerapi
+    spec:
+      containers:
+      - name: customerapi
+        image: fauxtistic/customerapi:ver2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customerapi
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: customerapi
+  ports:
+  - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderapi
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderapi
+  template:
+    metadata:
+      labels:
+        app: orderapi
+    spec:
+      containers:
+      - name: orderapi
+        image: fauxtistic/orderapi:ver2
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 250m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderapi
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: orderapi
+  ports:
+  - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productapi
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productapi
+  template:
+    metadata:
+      labels:
+        app: productapi
+    spec:
+      containers:
+      - name: productapi
+        image: fauxtistic/productapi:ver2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productapi
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: productapi
+  ports:
+  - port: 80
