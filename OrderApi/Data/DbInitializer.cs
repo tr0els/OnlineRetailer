@@ -26,6 +26,16 @@ namespace OrderApi.Data
                     Date = DateTime.Today,
                     OrderLines = new List<OrderLine>{
                         new OrderLine { ProductId = 1, Quantity = 2 } }
+                },
+                new Order
+                {
+                    CustomerId = 1,
+                    Date = DateTime.Today,
+                    OrderLines = new List<OrderLine>
+                    {
+                        new OrderLine { ProductId = 1, Quantity = 2 },
+                        new OrderLine { ProductId = 2, Quantity = 1 }
+                    }
                 }
             };
 

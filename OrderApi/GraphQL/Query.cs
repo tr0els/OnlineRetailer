@@ -11,7 +11,7 @@ namespace OrderApi.GraphQL
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Order> GetOrder([Service] OrderApiContext context)
+        public IQueryable<Order> GetOrders([Service] OrderApiContext context)
         {
             return context.Orders;
         }

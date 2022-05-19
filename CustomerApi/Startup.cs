@@ -26,18 +26,32 @@ namespace CustomerApi
         string cloudAMQPConnectionString =
             "host=rattlesnake.rmq.cloudamqp.com;virtualHost=pfyoxdnf;username=pfyoxdnf;password=Sh-G_0bSs87gBcJ54vJMva1IWeWdQ6pQ";
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // In-memory database:
-            services.AddDbContext<CustomerApiContext>(opt => opt.UseInMemoryDatabase("CustomersDb"));
+            // services.AddDbContext<CustomerApiContext>(opt => opt.UseInMemoryDatabase("CustomersDb"));
+
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            });
+
+            services.AddDbContext<CustomerApiContext>(options =>
+            {
+                options
+                .UseLoggerFactory(loggerFactory)
+                .UseSqlite("Data Source=customers.db");
+            });
 
             // Register repositories for dependency injection
             services.AddScoped<IRepository<Customer>, CustomerRepository>();
@@ -53,7 +67,8 @@ namespace CustomerApi
                 .AddGraphQLServer()
                 .AddQueryType<Query>()
                 .AddFiltering()
-                .AddSorting();
+                .AddSorting()
+                .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = Environment.IsDevelopment());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

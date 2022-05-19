@@ -1,3 +1,17 @@
-﻿extend type Customer {
+﻿extend type Query {
+  customers: [Customer] @delegate(schema: "customers")
+  orders: [Order] @delegate(schema: "orders" path: "orders")
+  products: [Product] @delegate(schema: "products" path: "products")
+}
+
+extend type Customer {
   orders: [Order] @delegate(schema: "orders" path: "ordersByCustomer(customerId: $fields:id)")
+}
+
+extend type OrderLine {
+  product: Product @delegate(schema: "products" path: "product(id: $fields:productId)")
+}
+
+extend type Order {
+  customer: Customer @delegate(schema: "customers" path: "customer(id: $fields:customerId)")
 }

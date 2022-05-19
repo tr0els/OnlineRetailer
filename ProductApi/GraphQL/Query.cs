@@ -10,9 +10,14 @@ namespace ProductApi.GraphQL
     {
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Product> GetProduct([Service] ProductApiContext context)
+        public IQueryable<Product> GetProducts([Service] ProductApiContext context)
         {
             return context.Products;
+        }
+        
+        public Product GetProduct(int id, [Service] ProductApiContext context)
+        {
+            return context.Products.FirstOrDefault(p => p.Id == id);
         }
     }
 }

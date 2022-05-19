@@ -44,9 +44,10 @@ namespace GraphQLGateway
                 .AddRemoteSchema(Products);*/
 
             services.AddGraphQLServer()
-                .AddRemoteSchema(Customers)
-                .AddRemoteSchema(Orders)
-                .AddRemoteSchema(Products)
+                .AddQueryType(d => d.Name("Query"))
+                .AddRemoteSchema(Customers, ignoreRootTypes: true)
+                .AddRemoteSchema(Orders, ignoreRootTypes: true)
+                .AddRemoteSchema(Products, ignoreRootTypes: true)
                 .AddTypeExtensionsFromFile("./stitching.graphql");
 
             services.AddControllers();
