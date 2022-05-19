@@ -1,14 +1,33 @@
 ﻿using CustomerApi.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CustomerApi.Data
 {
     public class DbInitializer : IDbInitializer
     {
+        private CustomerApiContext context;
+
+        public DbInitializer(IDbContextFactory<CustomerApiContext> dbContextFactory)
+        {
+            context = dbContextFactory.CreateDbContext();
+        }
+
+        public void Dispose()
+        {
+            context.Dispose();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return context.DisposeAsync();
+        }
+
         // This method will create and seed the database.
-        public void Initialize(CustomerApiContext context)
+        public void Initialize()
         {
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();

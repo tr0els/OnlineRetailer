@@ -2,6 +2,7 @@ using CustomerApi.Data;
 using CustomerApi.GraphQL;
 using CustomerApi.Infrastructure;
 using CustomerApi.Models;
+using HotChocolate.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -46,7 +47,7 @@ namespace CustomerApi
                 builder.AddConsole();
             });
 
-            services.AddDbContext<CustomerApiContext>(options =>
+            services.AddPooledDbContextFactory<CustomerApiContext>(options =>
             {
                 options
                 .UseLoggerFactory(loggerFactory)
@@ -54,7 +55,9 @@ namespace CustomerApi
             });
 
             // Register repositories for dependency injection
-            services.AddScoped<IRepository<Customer>, CustomerRepository>();
+            // Hotchocolate requires this to be transient so dbcontext concurrency issue doesn't arise
+            // CustomerRepository must also implement IAsyncDisposable to dispose dbcontext back to pool
+            services.AddTransient<IRepository<Customer>, CustomerRepository>();
 
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
@@ -65,6 +68,8 @@ namespace CustomerApi
 
             services
                 .AddGraphQLServer()
+                .RegisterDbContext<CustomerApiContext>(DbContextKind.Pooled)
+                .RegisterService<IRepository<Customer>>()
                 .AddQueryType<Query>()
                 .AddFiltering()
                 .AddSorting()
@@ -78,9 +83,9 @@ namespace CustomerApi
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var dbContext = services.GetService<CustomerApiContext>();
                 var dbInitializer = services.GetService<IDbInitializer>();
-                dbInitializer.Initialize(dbContext);
+                // if dbInitializer doesn't implement both IAsyncDisposable and IDisposable, build errors will occur
+                dbInitializer.Initialize();
             }
 
             // Create a message listener in a separate thread.

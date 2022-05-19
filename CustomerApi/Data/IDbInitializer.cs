@@ -1,7 +1,9 @@
-﻿namespace CustomerApi.Data
+﻿using System;
+
+namespace CustomerApi.Data
 {
-    public interface IDbInitializer
+    public interface IDbInitializer : IAsyncDisposable, IDisposable
     {
-        void Initialize(CustomerApiContext context);
+        void Initialize();
     }
 }
