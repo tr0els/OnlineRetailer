@@ -1,11 +1,11 @@
 ﻿extend type Query {
-  customers: [Customer] @delegate(schema: "customers")
-  orders: [Order] @delegate(schema: "orders" path: "orders")
-  products: [Product] @delegate(schema: "products" path: "products")
+  customers(where: CustomerFilterInput, order: [CustomerSortInput]): [Customer] @delegate(schema: "customers")
+  orders(where: OrderFilterInput, order: [OrderSortInput]): [Order] @delegate(schema: "orders" path: "orders")
+  products(where: ProductFilterInput, order: [ProductSortInput]): [Product] @delegate(schema: "products" path: "products")
 }
 
 extend type Customer {
-  orders: [Order] @delegate(schema: "orders" path: "ordersByCustomer(customerId: $fields:id)")
+  orders(where: OrderFilterInput, order: [OrderSortInput]): [Order] @delegate(schema: "orders" path: "ordersByCustomer(customerId: $fields:id)")
 }
 
 extend type OrderLine {
