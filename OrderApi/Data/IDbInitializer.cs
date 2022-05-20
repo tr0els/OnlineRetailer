@@ -1,7 +1,9 @@
-﻿namespace OrderApi.Data
+﻿using System;
+
+namespace OrderApi.Data
 {
-    public interface IDbInitializer
+    public interface IDbInitializer : IAsyncDisposable, IDisposable
     {
-        void Initialize(OrderApiContext context);
+        void Initialize();
     }
 }

@@ -1,14 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using OrderApi.Models;
 
 namespace OrderApi.Data
 {
     public class DbInitializer : IDbInitializer
     {
+        private OrderApiContext context;
+
+        public DbInitializer(IDbContextFactory<OrderApiContext> dbContextFactory)
+        {
+            context = dbContextFactory.CreateDbContext();
+        }
+
+        public void Dispose()
+        {
+            context.Dispose();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return context.DisposeAsync();
+        }
+
         // This method will create and seed the database.
-        public void Initialize(OrderApiContext context)
+        public void Initialize()
         {
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();

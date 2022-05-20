@@ -1,4 +1,5 @@
 using System;
+using HotChocolate.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -42,10 +43,12 @@ namespace OrderApi
         public void ConfigureServices(IServiceCollection services)
         {
             // In-memory database:
-            services.AddDbContext<OrderApiContext>(opt => opt.UseInMemoryDatabase("OrdersDb"));
+            services.AddPooledDbContextFactory<OrderApiContext>(opt => opt.UseInMemoryDatabase("OrdersDb"));
 
             // Register repositories for dependency injection
-            services.AddScoped<IRepository<Order>, OrderRepository>();
+            // Hotchocolate requires this to be transient so dbcontext concurrency issue doesn't arise
+            // OrderRepository must also implement IAsyncDisposable to dispose dbcontext back to pool
+            services.AddTransient<IRepository<Order>, OrderRepository>();
 
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
@@ -69,6 +72,8 @@ namespace OrderApi
 
             services
                 .AddGraphQLServer()
+                .RegisterDbContext<OrderApiContext>(DbContextKind.Pooled)
+                .RegisterService<IRepository<Order>>()
                 .AddQueryType<Query>()
                 .AddProjections()
                 .AddFiltering()
@@ -83,9 +88,9 @@ namespace OrderApi
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var dbContext = services.GetService<OrderApiContext>();
                 var dbInitializer = services.GetService<IDbInitializer>();
-                dbInitializer.Initialize(dbContext);
+                // if dbInitializer doesn't implement both IAsyncDisposable and IDisposable, build errors will occur
+                dbInitializer.Initialize();
             }
 
             if (env.IsDevelopment())

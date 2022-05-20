@@ -4,16 +4,22 @@ using System.Linq;
 using SharedModels;
 using System;
 using OrderApi.Models;
+using System.Threading.Tasks;
 
 namespace OrderApi.Data
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository : IOrderRepository, IAsyncDisposable
     {
         private readonly OrderApiContext db;
 
-        public OrderRepository(OrderApiContext context)
+        public OrderRepository(IDbContextFactory<OrderApiContext> dbContextFactory)
         {
-            db = context;
+            db = dbContextFactory.CreateDbContext();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return db.DisposeAsync();
         }
 
         public Order Add(Order entity)
