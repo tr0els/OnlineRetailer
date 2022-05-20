@@ -1,13 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ProductApi.Models;
 
 namespace ProductApi.Data
 {
     public class DbInitializer : IDbInitializer
     {
+        private ProductApiContext context;
+
+        public DbInitializer(IDbContextFactory<ProductApiContext> dbContextFactory)
+        {
+            context = dbContextFactory.CreateDbContext();
+        }
+
+        public void Dispose()
+        {
+            context.Dispose();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return context.DisposeAsync();
+        }
+
         // This method will create and seed the database.
-        public void Initialize(ProductApiContext context)
+        public void Initialize()
         {
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();

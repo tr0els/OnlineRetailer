@@ -2,16 +2,23 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using ProductApi.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace ProductApi.Data
 {
-    public class ProductRepository : IRepository<Product>
+    public class ProductRepository : IRepository<Product>, IAsyncDisposable
     {
         private readonly ProductApiContext db;
 
-        public ProductRepository(ProductApiContext context)
+        public ProductRepository(IDbContextFactory<ProductApiContext> dbContextFactory)
         {
-            db = context;
+            db = dbContextFactory.CreateDbContext();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return db.DisposeAsync();
         }
 
         Product IRepository<Product>.Add(Product entity)

@@ -3,6 +3,7 @@ using HotChocolate.Data;
 using ProductApi.Data;
 using ProductApi.Models;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProductApi.GraphQL
 {
@@ -10,14 +11,14 @@ namespace ProductApi.GraphQL
     {
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Product> GetProducts([Service] ProductApiContext context)
+        public IQueryable<Product> GetProducts(ProductApiContext context)
         {
             return context.Products;
         }
         
-        public Product GetProduct(int id, [Service] ProductApiContext context)
+        public async Task<Product> GetProduct(int id, ProductBatchDataLoader loader)
         {
-            return context.Products.FirstOrDefault(p => p.Id == id);
+            return await loader.LoadAsync(id);
         }
     }
 }

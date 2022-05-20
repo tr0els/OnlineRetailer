@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using HotChocolate.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -34,10 +35,12 @@ namespace ProductApi
         public void ConfigureServices(IServiceCollection services)
         {
             // In-memory database:
-            services.AddDbContext<ProductApiContext>(opt => opt.UseInMemoryDatabase("ProductsDb"));
+            services.AddPooledDbContextFactory<ProductApiContext>(opt => opt.UseInMemoryDatabase("ProductsDb"));
 
             // Register repositories for dependency injection
-            services.AddScoped<IRepository<Product>, ProductRepository>();
+            // Hotchocolate requires this to be transient so dbcontext concurrency issue doesn't arise
+            // ProductRepository must also implement IAsyncDisposable to dispose dbcontext back to pool
+            services.AddTransient<IRepository<Product>, ProductRepository>();
 
             // Register database initializer for dependency injection
             services.AddTransient<IDbInitializer, DbInitializer>();
@@ -51,6 +54,8 @@ namespace ProductApi
 
             services
                 .AddGraphQLServer()
+                .RegisterDbContext<ProductApiContext>(DbContextKind.Pooled)
+                .RegisterService<IRepository<Product>>()
                 .AddQueryType<Query>()
                 .AddFiltering()
                 .AddSorting()
@@ -64,9 +69,9 @@ namespace ProductApi
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var dbContext = services.GetService<ProductApiContext>();
                 var dbInitializer = services.GetService<IDbInitializer>();
-                dbInitializer.Initialize(dbContext);
+                // if dbInitializer doesn't implement both IAsyncDisposable and IDisposable, build errors will occur
+                dbInitializer.Initialize();
             }
 
             // Create a message listener in a separate thread.
