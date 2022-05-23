@@ -73,6 +73,7 @@ namespace CustomerApi
                 .AddQueryType<Query>()
                 .AddFiltering()
                 .AddSorting()
+                .AddProjections()
                 .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = Environment.IsDevelopment());
         }
 
