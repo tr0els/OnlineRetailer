@@ -21,9 +21,12 @@ namespace OrderApi
         // The product service (running as a container) listens on this URL for HTTP requests
         // from other services specified in the docker compose file (which in this solution is
         // the order service).
-        string productServiceBaseUrl = "http://productapi/products/";
+        /*string productServiceBaseUrl = "http://productapi/products/";
 
-        string customerServiceBaseUrl = "http://customerapi/customers/";
+        string customerServiceBaseUrl = "http://customerapi/customers/";*/
+
+        string productServiceBaseUrl = "https://localhost:44398/products/";
+        string customerServiceBaseUrl = "https://localhost:44304/customers/";
 
         // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).
         // Remember to replace this connectionstring with your own.
